@@ -11,11 +11,11 @@ async function login(e) {
         console.log(response.data);
         alert(response.data.message);
         
-        if (Response.status === 201) {
-            window.location.href = "../Signup/sign.html";
-        } else {
-            throw new Error('Failed to sign up');
-        }
+        // if (Response.status === 201) {
+        //     window.location.href = "../Signup/sign.html";
+        // } else {
+        //     throw new Error('Failed to sign up');
+        // }
     } catch (err) {
         console.log(err);
         document.body.innerHTML += `<div style="color:red">${err.message}</div>`;
