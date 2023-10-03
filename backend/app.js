@@ -1,24 +1,25 @@
 const express = require('express');
 const app = express();
+
+
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const sequelize = require('./util/database');
 const User = require('./models/user');
 const userRouter = require('./routes/userRouter');
-
+const Login = require('./models/logins');
 const userController = require('./controllers/userController');
 
 app.use(cors());
-app.use(bodyParser.urlencoded({ extended: false })); // Use bodyParser.urlencoded for parsing application/x-www-form-urlencoded requests
+app.use(bodyParser.urlencoded({ extended: false })); 
 app.use(bodyParser.json());
 
-app.use('/', userRouter); // Mount the userRouter at the root path
+app.use('/', userRouter);
 
-// Define a default route for testing purposes
 // app.get('/', (req, res) => {
 //     res.send('Server is up and running');
 // });
-
+Login.sync();
 User.sync();
 sequelize.sync()
     .then((result) => {
