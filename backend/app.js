@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
-
-
+const Expense = require("./models/expense");
+const bcrypt = require('bcrypt');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const sequelize = require('./util/database');
@@ -19,6 +19,7 @@ app.use('/', userRouter);
 // app.get('/', (req, res) => {
 //     res.send('Server is up and running');
 // });
+Expense.sync();
 Login.sync();
 User.sync();
 sequelize.sync()
