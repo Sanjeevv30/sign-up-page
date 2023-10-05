@@ -9,6 +9,7 @@ exports.createExpense = async (req, res, next) => {
         amount,
         description,
         category,
+        trackerId : req.user.id
       });
   
       res.status(201).json(newExpense);

@@ -1,7 +1,12 @@
 const User = require("../models/user");
 const util = require("../util/database");
 const bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken');
 //const Expense = require('../models/expense');
+
+function generateJWT(id,name){
+  return jwt.sign({userId:id,name:name},'secretKey')
+}
 
 function isInputInvalid(e) {
   if (e == null || e == undefined || e.length == 0) {
@@ -52,7 +57,7 @@ exports.createLogin = async (req, res, next) => {
     }
 
     const user = await User.findAll({ where: { email: email } });
-    console.log(user);
+    console.log("response",user);
     if (user.length > 0) {
       bcrypt.compare(password, user[0].password, (err, resp) => {
         if (err) {
@@ -64,7 +69,7 @@ exports.createLogin = async (req, res, next) => {
           console.log("first error", resp);
           return res
             .status(201)
-            .json({ message: "User login Successful", user });
+            .json({ message: "User login Successful", user, token:generateJWT(user[0].id,user[0].name)});
         } else {
           console.log(resp);
           return res.status(400).json({ message: "Password not authorized" });

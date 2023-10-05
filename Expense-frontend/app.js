@@ -1,7 +1,8 @@
 let expenses = [];
 async function fetchExpenses() {
     try {
-        const response = await axios.get('http://localhost:8000/expense/get-expense'); 
+        const token = localStorage.getItem('token');
+        const response = await axios.get('http://localhost:8000/expense/get-expense',{headers: {"Authorization": token}}); 
         expenses = response.data;
         renderExpenses(expenses);
     } catch (error) {
@@ -12,7 +13,8 @@ async function saveOrUpdateExpense(index, amount, description, category) {
     try {
         if (isNaN(index)) {
             const newExpense = { amount, description, category };
-            const response = await axios.post('http://localhost:8000/expense/add-expense', newExpense); 
+            const token = localStorage.getItem('token');
+            const response = await axios.post('http://localhost:8000/expense/add-expense', newExpense,{headers: {"Authorization": token}}); 
             expenses.push(response.data);
         } else {
             const updatedExpense = { id: expenses[index].id, amount, description, category };
