@@ -18,5 +18,6 @@ const User = sequelize.define("tracker", {
     type: Sequelize.STRING,
     allowNull: false,
   },
+  premiumUser: Sequelize.BOOLEAN
 });
 module.exports = User;

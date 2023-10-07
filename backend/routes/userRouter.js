@@ -15,7 +15,7 @@ router.post("/expense/add-expense",authentication.authenticate, expenseControlle
 
 router.get("/expense/get-expense",authentication.authenticate, expenseController.getAllExpenses);
 
-router.delete("/expense/delete/:Id", expenseController.deleteExpense);// i am not adding authentication.authenticate
+router.delete("/expense/delete/:Id",authentication.authenticate,expenseController.deleteExpense);
 
 router.put("/expense/edit/:Id", expenseController.updateExpense);
 

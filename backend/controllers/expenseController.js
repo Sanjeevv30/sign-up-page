@@ -1,4 +1,3 @@
-
 const Expense = require('../models/expense');
 
 exports.createExpense = async (req, res, next) => {
@@ -22,7 +21,7 @@ exports.createExpense = async (req, res, next) => {
   exports.getAllExpenses = async (req, res, next) => {
     try {
      
-      const expenses = await Expense.findAll();
+      const expenses = await req.user.getExpenses();
   
       res.json(expenses);
     } catch (error) {
@@ -34,17 +33,22 @@ exports.createExpense = async (req, res, next) => {
   exports.deleteExpense = async (req, res, next) => {
     try {
       const id = req.params.Id;
-  
+      console.log(req.user.id,id);
       const expense = await Expense.findByPk(id);
-  
+  console.log(expense);
+ 
       if (!expense) {
         return res.status(404).json({ err: 'Expense not found' });
       }
   
-      await expense.destroy();
-  
+      const resp=await Expense.destroy({where:{id:id,trackerId : req.user.id}});
+      if(resp ===0){
+        throw new Error('user cannot find');
+      }
+  console.log(resp);
       res.status(204).json({ message: 'Expense deleted successfully' });
     } catch (error) {
+
       console.error('Error deleting expense:', error);
       res.status(500).json({ error: 'Server error' });
     }
