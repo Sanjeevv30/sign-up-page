@@ -1,11 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const expenseController = require("../controllers/expenseController");
-const userController = require("../controllers/userController");
+//const userController = require("../controllers/userController");
 const Expense = require('../models/expense');
 const authentication = require("../middlewares/authorize");
+const userController = require("../controllers/userController");
 
 router.post("/add-user/Signup", userController.createUser);
+// router.post("/add-user/Signup", function(req, res){
+//     userController.createUser
+//   });
 
 router.post("/login", userController.createLogin);
 

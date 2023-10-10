@@ -22,10 +22,9 @@ exports.createExpense = async (req, res, next) => {
     try {
      
       const expenses = await req.user.getExpenses();
-  
       res.json(expenses);
     } catch (error) {
-      console.error('Error retrieving expenses:', error);
+      console.log('Error retrieving expenses:', error);
       res.status(500).json({ error: 'Server error' });
     }
   };

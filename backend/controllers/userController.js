@@ -2,12 +2,10 @@ const User = require("../models/user");
 const util = require("../util/database");
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
-//const Expense = require('../models/expense');
 
-function generateJWT(id,name){
-  return jwt.sign({userId:id,name:name},'secretKey')
-}
-
+exports.generateJWT = (id, name, premiumUser) => {
+  return jwt.sign({ userId: id, name: name, premiumUser: premiumUser }, 'secretKey');
+};
 function isInputInvalid(e) {
   if (e == null || e == undefined || e.length == 0) {
     return true;
@@ -69,7 +67,8 @@ exports.createLogin = async (req, res, next) => {
           console.log("first error", resp);
           return res
             .status(201)
-            .json({ message: "User login Successful", user, token:generateJWT(user[0].id,user[0].name)});
+            .json({ message: "User login Successful", user, token: exports.generateJWT(user[0].id, user[0].name, user[0].premiumUser)
+          });
         } else {
           console.log(resp);
           return res.status(400).json({ message: "Password not authorized" });
@@ -83,5 +82,6 @@ exports.createLogin = async (req, res, next) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
 
 

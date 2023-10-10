@@ -52,21 +52,22 @@
         </select>
       </div>
       <br />
-
       <button class="btn btn-primary btn-block" id="add-expense">
         Add Expense</button
       ><br /><br />
+      <div id="message"></div>
       <button id="rzp-button1">Buy Premium</button>
-
-      <ul class="list-group mt-4" id="expense-list"></ul>
-
       <div class="mt-4">
         <strong>Total Expenses:</strong> <span id="total-expenses">$0.00</span>
       </div>
     </div>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <h2>Expenses</h2>
+    <ul class="list-group mt-4" id="expense-list"></ul>
+    
+    <ul id= "leaderboard" ></ul>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <!-- <a href="../Expense-frontend/index.html">New User-Login</a> -->
+    <!-- <a href="../Expense-frontend/index.html">New User-Login</a>  -->
     <script src="app.js"></script>
   </body>
 </html>
