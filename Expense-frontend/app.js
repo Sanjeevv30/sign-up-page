@@ -1,9 +1,12 @@
 let token;
 let expenses = [];
 function showPremium(){
+  
   document.getElementById("rzp-button1").style.visibility = "hidden"
   document.getElementById("message").innerHTML = "You are a premium member";
+
 }
+
 function parseJwt (token) {
   var base64Url = token.split('.')[1];
   var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -29,7 +32,7 @@ function showLeaderboard() {
       LeaderboardElem.innerHTML = '<h1>Leader Board</h1>'; 
 
       userLeaderBoardArray.forEach((userDetails) => {
-        LeaderboardElem.innerHTML += `<li>- Name:  ${userDetails.name} , Total Expenses:  ${userDetails.total_cost}</li>`;
+        LeaderboardElem.innerHTML += `<li>- Name:  ${userDetails.name} , Total Expenses : ₹ ${userDetails.totalExpenses}</li>`;
       });
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
@@ -92,7 +95,7 @@ function renderExpenses(expenses) {
     item.className =
       "list-group-item d-flex justify-content-between align-items-center";
     item.innerHTML = `
-            <span>${expense.description} - $${expense.amount} on ${expense.category}</span>
+            <span>${expense.description} - ₹ ${expense.amount} on ${expense.category}</span>
             <div>
                 <button class="btn btn-sm btn-danger mr-2" onclick="deleteExpense(${index})">Delete</button>
                 <button class="btn btn-sm btn-primary" onclick="editExpense(${index})">Edit</button>
@@ -102,7 +105,7 @@ function renderExpenses(expenses) {
   });
 
   const totalExpenseDisplay = document.getElementById("total-expenses");
-  totalExpenseDisplay.textContent = `$${calculateTotalExpenses(expenses)}`;
+  totalExpenseDisplay.textContent = `₹ ${calculateTotalExpenses(expenses)}`;
 }
 
 function calculateTotalExpenses(expenses) {
@@ -137,7 +140,7 @@ window.addEventListener("DOMContentLoaded", async function () {
     try {
       if(premiumUser){
         showPremium();
-        showLeaderboard();
+       showLeaderboard();
       }
       const response = await axios.get(
         "http://localhost:8000/expense/get-expense",
@@ -193,6 +196,7 @@ document.getElementById("rzp-button1").onclick = async function (e) {
     "key": response.data.key_id,
     "order_id": response.data.order.id,
     "handler": async function (response) {
+
        const res = await axios.post(
         "http://localhost:8000/purchase/updatetransactionstatus",
         {
@@ -203,8 +207,10 @@ document.getElementById("rzp-button1").onclick = async function (e) {
       );
       console.log(res)
       alert("You are a premium member");
+      showLeaderboard();
       document.getElementById("rzp-button1").style.visibility = "hidden"
       document.getElementById("message").innerHTML = "You are a premium member";
+      showLeaderboard();
       localStorage.setItem('token',res.data.token);
     },
   };

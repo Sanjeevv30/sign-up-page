@@ -6,15 +6,15 @@ const sequelize = require("../util/database");
 const getUserLeaderBoard = async (req, res) => {
   try {
     const leaderBoardUser = await User.findAll({
-      attributes:['id','name',[sequelize.fn('sum',sequelize.col('amount')),'total_cost']],
-      include:[
-        {
-          model : Expense,
-          attributes:[]
-        }
-      ],
-      group:['tracker.id'],
-      order:[['total_cost','DESC']]
+      // attributes:['id','name',[sequelize.fn('sum',sequelize.col('amount')),'total_cost']],
+      // include:[
+      //   {
+      //     model : Expense,
+      //     attributes:[]
+      //   }
+      // ],
+      // group:['tracker.id'],
+      order:[['totalExpenses','DESC']]
     });
    
     res.status(200).json(leaderBoardUser);
