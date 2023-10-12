@@ -207,7 +207,7 @@ document.getElementById("rzp-button1").onclick = async function (e) {
       );
       console.log(res)
       alert("You are a premium member");
-      showLeaderboard();
+      //showLeaderboard();
       document.getElementById("rzp-button1").style.visibility = "hidden"
       document.getElementById("message").innerHTML = "You are a premium member";
       showLeaderboard();

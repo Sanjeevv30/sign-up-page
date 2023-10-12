@@ -8,13 +8,15 @@
 <body>
     <form  onsubmit="login(event)">
     <label for="email" >Email:</label>
-    <input type="text" id="email" placeholder="Please enter you email" required>
+    <input type="email" id="email" placeholder="Please enter you email" required>
     <label for="password">Password:</label>
     <input type="password" id="password" placeholder="Please enter you password" required>
     <button>Send</button>
-</form>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</form><br>
+<button onclick="forgotpassword()"> Forgot password</button><br><br>
 <a href="../SignUp/sign.html">New User-SignUp</a>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
 <script src="login.js"></script>
 
 </body>
