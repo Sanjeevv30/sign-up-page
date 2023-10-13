@@ -141,6 +141,7 @@ window.addEventListener("DOMContentLoaded", async function () {
       if(premiumUser){
         showPremium();
        showLeaderboard();
+       //download();
       }
       const response = await axios.get(
         "http://localhost:8000/expense/get-expense",
@@ -183,6 +184,23 @@ document.getElementById("add-expense").addEventListener("click", () => {
   document.getElementById("expense-description").value = "";
 });
 
+async function download() {
+  try {
+    const response = await axios.get('http://localhost:8000/user/download', { headers: { "Authorization": token } });
+
+    if (response.status === 201) {
+      const a = document.createElement("a");
+      a.href = response.data.fileUrl;
+      a.download = 'myexpense.csv';
+      a.click();
+    } else {
+      throw new Error(response.data.message);
+    }
+  } catch (err) {
+    showError(err);
+  }
+}
+
 
 document.getElementById("rzp-button1").onclick = async function (e) {
   
@@ -194,7 +212,19 @@ document.getElementById("rzp-button1").onclick = async function (e) {
   console.log(response);
   var options = {
     "key": response.data.key_id,
+    "name": "Expense Company",
+    "name": "SRIVASTAVA AND SONS",
     "order_id": response.data.order.id,
+    "prefill": {
+      "name": "Test User",
+      "email": "test.user@example.com",
+      "name": "Sanjeev Srivastava",
+      "email": "sanjeevsrivastava107@gmail.com",
+      "contact": "8249654461"
+    },
+    "theme": {
+     "color": "#3399cc"
+    },
     "handler": async function (response) {
 
        const res = await axios.post(
@@ -207,7 +237,6 @@ document.getElementById("rzp-button1").onclick = async function (e) {
       );
       console.log(res)
       alert("You are a premium member");
-      //showLeaderboard();
       document.getElementById("rzp-button1").style.visibility = "hidden"
       document.getElementById("message").innerHTML = "You are a premium member";
       showLeaderboard();
@@ -219,8 +248,13 @@ document.getElementById("rzp-button1").onclick = async function (e) {
   e.preventDefault();
 
   rzpl.on("payment.failed", function (response) {
-    console.log(response);
-    alert("Something went wrong");
+    alert(response.error.code);
+  alert(response.error.description);
+  alert(response.error.source);
+  alert(response.error.step);
+  alert(response.error.reason);
+  alert(response.error.metadata.order_id);
+  alert(response.error.metadata.payment_id);
   });
 }
 });

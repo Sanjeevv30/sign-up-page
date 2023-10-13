@@ -11,7 +11,7 @@ dotenv.config();
 const sendResetPasswordEmail = async (email, id) => {
   const Client = Sib.ApiClient.instance;
   var apiKey = Client.authentications["api-key"];
-  //console.log(process.env.API_KEY);
+  console.log(process.env.API_KEY);
   apiKey.apiKey = process.env.API_KEY;
   const sender = {
     email: "srivassaroj39@gmail.com",
@@ -116,10 +116,10 @@ const updatepassword = async (req, res) => {
     const hash = await bcrypt.hash(newpassword, saltRounds);
 
     await user.update({ password: hash });
-    
+
 
     return res.status(201).json({ message: "Password updated successfully", success: true });
-    
+
   } catch (error) {
     return res.status(500).json({ error: error.message, success: false });
   }
