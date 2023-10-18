@@ -1,15 +1,17 @@
 const express = require("express");
 const app = express();
-const dotenv = require('dotenv');
+const dotenv = require("dotenv");
 const Expense = require("./models/expense");
-const premiumFeatureRoutes = require('./routes/premiumFeature');
+const premiumFeatureRoutes = require("./routes/premiumFeature");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const sequelize = require("./util/database");
 const User = require("./models/user");
 const userRouter = require("./routes/userRouter");
-const Forgotpassword = require('./models/forgotpassword');
-const resetPasswordRoutes = require('./routes/resetpasswords')
+const Forgotpassword = require("./models/forgotpassword");
+const resetPasswordRoutes = require("./routes/resetpasswords");
+const FileUrl = require("./models/FileUrl");
+
 
 const Order = require("./models/orders");
 const purchaseRoutes = require("./routes/purchaseRoute");
@@ -19,8 +21,8 @@ app.use(bodyParser.json());
 
 app.use("/", userRouter);
 app.use("/purchase", purchaseRoutes);
-app.use("/premium",premiumFeatureRoutes);
-app.use('/password', resetPasswordRoutes);
+app.use("/premium", premiumFeatureRoutes);
+app.use("/password", resetPasswordRoutes);
 
 
 User.hasMany(Expense);
@@ -31,9 +33,14 @@ Forgotpassword.belongsTo(User);
 
 User.hasMany(Order);
 Order.belongsTo(User);
+
+User.hasMany(FileUrl);
+FileUrl.belongsTo(User);
+
 Forgotpassword.sync();
+FileUrl.sync();
 Order.sync();
-User.sync()
+User.sync();
 sequelize
   .sync()
   .then((result) => {

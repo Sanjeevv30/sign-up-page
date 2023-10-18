@@ -1,17 +1,18 @@
 const uuid = require("uuid");
-const sgMail = require("@sendgrid/mail");
+//const sgMail = require("@sendgrid/mail");
 const bcrypt = require("bcrypt");
 const sequelize = require("../util/database");
 var Sib = require("sib-api-v3-sdk");
 const User = require("../models/user");
 const Forgotpassword = require("../models/forgotpassword");
+
 const dotenv = require("dotenv");
 dotenv.config();
 
-const sendResetPasswordEmail = async (email, id) => {
+const sendResetPasswordEmail = (id) => {
   const Client = Sib.ApiClient.instance;
   var apiKey = Client.authentications["api-key"];
-  console.log(process.env.API_KEY);
+  //console.log(process.env.API_KEY);
   apiKey.apiKey = process.env.API_KEY;
   const sender = {
     email: "srivassaroj39@gmail.com",
@@ -30,15 +31,18 @@ const sendResetPasswordEmail = async (email, id) => {
     to: receivers,
     subject: "Reset Password",
     text: "Reset your password",
-    textContent: `<a href="http://localhost:8000/password/forgotpassword/${id}">Reset password</a>`,
+    htmlContent: `<a href="http://localhost:8000/password/forgotpassword/${id}">Reset password</a>`,
   };
-  transEmailApi
+
+  return transEmailApi
     .sendTransacEmail(msg)
     .then((resp) => {
       console.log("Email sent successfully:", resp);
+      return resp;
     })
     .catch((err) => {
-      console.error("Email sending failed:", err);
+      console.log("Email sending failed:", err);
+      return err;
     });
 };
 
@@ -53,14 +57,15 @@ const forgotpassword = async (req, res) => {
 
     if (user) {
       const id = uuid.v4();
-      user.createForgotpassword({ id, active: true });
-
-      await sendResetPasswordEmail(email, id);
-
-      return res.json({
-        message: "Link to reset password sent to your email",
-        success: true,
-      });
+      await user.createForgotpassword({ id, active: true });
+      const restore = await sendResetPasswordEmail(id);
+      console.log("Errorrrrrrr", restore);
+      if (restore !== undefined) {
+        return res.json({
+          message: "Link to reset password sent to your email",
+          success: true,
+        });
+      }
     } else {
       throw new Error("User does not exist");
     }
@@ -95,19 +100,24 @@ const resetpassword = (req, res) => {
   });
 };
 
-
 const updatepassword = async (req, res) => {
   try {
     const { newpassword } = req.query;
     const resetpasswordid = req.params.id;
 
-    const resetpasswordrequest = await Forgotpassword.findOne({ where: { id: resetpasswordid } });
+    const resetpasswordrequest = await Forgotpassword.findOne({
+      where: { id: resetpasswordid },
+    });
 
     if (!resetpasswordrequest) {
-      return res.status(404).json({ error: "Forgot password request not found", success: false });
+      return res
+        .status(404)
+        .json({ error: "Forgot password request not found", success: false });
     }
 
-    const user = await User.findOne({ where: { id: resetpasswordrequest.trackerId } });
+    const user = await User.findOne({
+      where: { id: resetpasswordrequest.trackerId },
+    });
 
     if (!user) {
       return res.status(404).json({ error: "User not found", success: false });
@@ -117,9 +127,9 @@ const updatepassword = async (req, res) => {
 
     await user.update({ password: hash });
 
-
-    return res.status(201).json({ message: "Password updated successfully", success: true });
-
+    return res
+      .status(201)
+      .json({ message: "Password updated successfully", success: true });
   } catch (error) {
     return res.status(500).json({ error: error.message, success: false });
   }

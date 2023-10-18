@@ -89,6 +89,10 @@ async function deleteExpense(index) {
 function renderExpenses(expenses) {
   const expenseList = document.getElementById("expense-list");
   expenseList.innerHTML = "";
+  // if (!Array.isArray(expenses)) {
+  //   expenseList.innerHTML = "<p>No expenses available.</p>";
+  //   return;
+  // }
 
   expenses.forEach((expense, index) => {
     const item = document.createElement("li");
@@ -136,12 +140,10 @@ window.addEventListener("DOMContentLoaded", async function () {
   const decodeToken = parseJwt(token);
   console.log(decodeToken);
    const premiumUser=decodeToken.premiumUser
-   console.log(premiumUser);
     try {
       if(premiumUser){
         showPremium();
        showLeaderboard();
-       //download();
       }
       const response = await axios.get(
         "http://localhost:8000/expense/get-expense",
@@ -149,9 +151,14 @@ window.addEventListener("DOMContentLoaded", async function () {
       );
       expenses = response.data;
       renderExpenses(expenses);
+      //const files = await axios.get('')
+      renderExpensesForPage(expenses, currentPage, itemsPerPage);
+    renderPageNumbers(expenses, itemsPerPage);
     } catch (error) {
       console.error("Error fetching expenses:", error);
     }
+
+
   
 document.getElementById("add-expense").addEventListener("click", () => {
   const amount = parseFloat(document.getElementById("expense-amount").value);
@@ -184,13 +191,15 @@ document.getElementById("add-expense").addEventListener("click", () => {
   document.getElementById("expense-description").value = "";
 });
 
-async function download() {
+document.getElementById("downloadexpense").onclick = async function download() {
   try {
-    const response = await axios.get('http://localhost:8000/user/download', { headers: { "Authorization": token } });
+    const response = await axios.get('http://localhost:8000/download', { headers: { "Authorization": token } });
 
-    if (response.status === 201) {
+    if (response.status === 200) {
+      const fileURL = response.data.fileURL;
+      //console.log('File URL:', fileURL);
       const a = document.createElement("a");
-      a.href = response.data.fileUrl;
+      a.href = fileURL;
       a.download = 'myexpense.csv';
       a.click();
     } else {
@@ -200,6 +209,12 @@ async function download() {
     showError(err);
   }
 }
+
+function showError(err) {
+  console.log(err);
+  document.body.innerHTML += `<div style="color:red">${err.message}</div>`;
+}
+
 
 
 document.getElementById("rzp-button1").onclick = async function (e) {
@@ -257,4 +272,52 @@ document.getElementById("rzp-button1").onclick = async function (e) {
   alert(response.error.metadata.payment_id);
   });
 }
+});
+
+let currentPage = 1;
+const itemsPerPage = 10; 
+
+
+function renderExpensesForPage(expenses, currentPage, itemsPerPage) {
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const expensesForPage = expenses.slice(start, end);
+    renderExpenses(expensesForPage);
+}
+
+function renderPageNumbers(expenses, itemsPerPage) {
+    const totalPages = Math.ceil(expenses.length / itemsPerPage);
+    const pageNumbersElem = document.getElementById("page-numbers");
+    pageNumbersElem.innerHTML = "";
+
+    for (let i = 1; i <= totalPages; i++) {
+        const pageNumberButton = document.createElement("button");
+        pageNumberButton.textContent = i;
+        pageNumberButton.classList.add("btn", "btn-secondary");
+
+       
+        pageNumberButton.addEventListener("click", () => {
+            currentPage = i;
+            renderExpensesForPage(expenses, currentPage, itemsPerPage);
+            renderPageNumbers(expenses, itemsPerPage);
+        });
+
+        pageNumbersElem.appendChild(pageNumberButton);
+    }
+}
+document.getElementById("prev-page").addEventListener("click", () => {
+  if (currentPage > 1) {
+      currentPage--;
+      renderExpensesForPage(expenses, currentPage, itemsPerPage);
+      renderPageNumbers(expenses, itemsPerPage);
+  }
+});
+
+document.getElementById("next-page").addEventListener("click", () => {
+  const totalPages = Math.ceil(expenses.length / itemsPerPage);
+  if (currentPage < totalPages) {
+      currentPage++;
+      renderExpensesForPage(expenses, currentPage, itemsPerPage);
+      renderPageNumbers(expenses, itemsPerPage);
+  }
 });
