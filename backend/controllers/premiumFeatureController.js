@@ -12,6 +12,17 @@ const getUserLeaderBoard = async (req, res) => {
   }
 };
 
+exports.getDownloads = async function (req,res,next){
+  try{
+    const file = await req.user.downloadExpenses();
+    res.json({file,premium:req.user.premiumUser})
+
+  }catch(err){
+    res.status.json({message:"not downloaded"});
+  }
+}
+
 module.exports = {
   getUserLeaderBoard,
+  
 };

@@ -17,8 +17,7 @@ router.post("/expense/add-expense",authentication.authenticate, expenseControlle
 
 router.get('/download', authentication.authenticate, expenseController.downloadExpenses)
 
-//router.get('/download-history',authentication.authenticate, downloadHistoryController.listDownloadHistory);
-
+router.get('/history',authentication.authenticate,expenseController.getAllFileUrls);
 
 router.get("/expense/get-expense",authentication.authenticate, expenseController.getAllExpenses);
 

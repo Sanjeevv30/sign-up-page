@@ -5,6 +5,7 @@ const { v1: uuidv1 } = require("uuid");
 const UserServices = require('../services/userservice');
 const S3Services =require('../services/S3services');
 const FileUrl = require("../models/FileUrl");
+const { query } = require("express");
 
 
 exports.downloadExpenses = async (req, res) => {
@@ -16,11 +17,14 @@ exports.downloadExpenses = async (req, res) => {
     const trackerId = req.user.id;
     const filename = `Expense${trackerId}/${new Date().toLocaleString()}.txt`;
     const fileURL = await S3Services.uploadToS3(stringifiedExpense, filename);
+
     //console.log(fileURL);
   await FileUrl.create({
   url:fileURL,
-  date: new Date().toLocaleString()
+  date: new Date().toLocaleString(),
+  trackerId: req.user.id
  }); 
+
     res.status(200).json({ fileURL, success: true });
   } catch (error) {
     console.log("Error: ", error);
@@ -61,15 +65,65 @@ exports.createExpense = async (req, res, next) => {
 
 exports.getAllExpenses = async (req, res, next) => {
   try {
-    const expenses = await req.user.getExpenses();
-   //findurl = await req.user.getFileUrls();
-
+    // const Pagination = req.query.pagination;
+    // console.log(Pagination);
+    const Pagination = req.query.pagination;
+    if (Pagination === null || Pagination === undefined || isNaN(Pagination)) {
+      return res.status(400).json({ error: "Invalid or missing Pagination value" });
+    }
+    
+    const expenses = await req.user.getExpenses({limit:parseInt(Pagination)});
     res.json(expenses);
   } catch (error) {
     console.log("Error retrieving expenses:", error);
     res.status(500).json({ error: "Server error" });
   }
 };
+// exports.getAllExpenses = async (req, res, next) => {
+//   try {
+//     const pagination = parseInt(req.query.pagination);
+
+//     if (isNaN(pagination) || pagination <= 0) {
+//       return res.status(400).json({ error: "Invalid pagination value" });
+//     }
+
+//     const total = await Expense.count({ where: { trackerId: req.user.id } });
+//     const hasNextPage = (pagination * 5) < total;
+
+//     const pageData = {
+//       pagination,
+//       lastPage: Math.ceil(total / 5),
+//       hasNextPage,
+//       previousPage: pagination - 1,
+//       nextPage: pagination + 1,
+//     };
+
+//     const promise1 = req.user.getExpenses({ offset: (pagination - 1) * 5, limit: 5 });
+//     const promise2 = req.user.downloadExpenses;
+//     const [expenses, files] = await Promise.all([promise1, promise2]);
+
+//     console.log('Check for premiumUser', req.user.premiumUser, req.user.premiumUser === true);
+
+//     res.json({ expenses, pageData, premium: req.user.premiumUser, files });
+//   } catch (error) {
+//     console.log("Error retrieving expenses:", error);
+//     res.status(500).json({ error: "Server error" });
+//   }
+// };
+
+
+exports.getAllFileUrls = async (req, res,  next) => {
+  try {
+   findurl = await req.user.getFileUrls();
+   console.log('files',findurl)
+    res.json(findurl);
+  } catch (error) {
+    console.log("Error retrieving expenses:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+
 exports.deleteExpense = async (req, res, next) => {
   const tran = await sequelize.transaction();
 

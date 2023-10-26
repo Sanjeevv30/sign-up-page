@@ -11,7 +11,7 @@ const userRouter = require("./routes/userRouter");
 const Forgotpassword = require("./models/forgotpassword");
 const resetPasswordRoutes = require("./routes/resetpasswords");
 const FileUrl = require("./models/FileUrl");
-
+const helmet = require('helmet');
 
 const Order = require("./models/orders");
 const purchaseRoutes = require("./routes/purchaseRoute");
@@ -24,7 +24,7 @@ app.use("/purchase", purchaseRoutes);
 app.use("/premium", premiumFeatureRoutes);
 app.use("/password", resetPasswordRoutes);
 
-
+app.use(helmet());
 User.hasMany(Expense);
 Expense.belongsTo(User);
 

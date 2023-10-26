@@ -11,17 +11,13 @@ async function login(e) {
       "http://localhost:8000/login",
       loginDetails
     );
-    // if(response.status === 200){
+    
     console.log(response.data);
     localStorage.setItem("token", response.data.token);
     localStorage.setItem("userDetails", JSON.stringify(response.data.user));
     alert(response.data.message);
 
     window.location.href = "../Expense-frontend/index.html";
-
-    // } else {
-    //     throw new Error('Failed to login')
-    // }
   } catch (err) {
     console.log(err);
     document.body.innerHTML += `<div style="color:red">${err.message}</div>`;
