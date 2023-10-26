@@ -58,7 +58,7 @@ exports.createExpense = async (req, res, next) => {
     res.status(201).json(newExpense);
   } catch (error) {
     await trans.rollback();
-    console.error("Error creating expense:", error);
+    console.log("Error creating expense:", error);
     res.status(500).json({ error: "Server error" });
   }
 };

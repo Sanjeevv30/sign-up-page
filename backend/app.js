@@ -1,4 +1,6 @@
 const express = require("express");
+const path = require('path')
+const fs = require('fs')
 const app = express();
 const dotenv = require("dotenv");
 const Expense = require("./models/expense");
@@ -12,9 +14,15 @@ const Forgotpassword = require("./models/forgotpassword");
 const resetPasswordRoutes = require("./routes/resetpasswords");
 const FileUrl = require("./models/FileUrl");
 const helmet = require('helmet');
+const morgan = require('morgan');
 
 const Order = require("./models/orders");
 const purchaseRoutes = require("./routes/purchaseRoute");
+const accessLogStream = fs.createWriteStream(path.join(__dirname,
+  'access.log'),
+{flag:'a'});
+app.use(helmet());
+app.use(morgan('combined',{stream:accessLogStream}));
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -24,7 +32,7 @@ app.use("/purchase", purchaseRoutes);
 app.use("/premium", premiumFeatureRoutes);
 app.use("/password", resetPasswordRoutes);
 
-app.use(helmet());
+
 User.hasMany(Expense);
 Expense.belongsTo(User);
 
