@@ -62,7 +62,7 @@ async function saveOrUpdateExpense(index, amount, description, category) {
         newExpense,
         { headers: { Authorization: token } }
       );
-      expenses.push(response.data);
+      expenses.expenses.push(response.data);
     } else {
       const updatedExpense = {
         id: expenses[index].id,
@@ -96,10 +96,12 @@ async function deleteExpense(index) {
   }
 }
 
+
 function renderExpenses(expenses) {
   const expenseList = document.getElementById("expense-list");
   expenseList.innerHTML = "";
-  expenses.forEach((expense, index) => {
+console.log(expenses)
+  expenses.expenses.map((expense, index) => {
     const item = document.createElement("li");
     item.className =
       "list-group-item d-flex justify-content-between align-items-center";
@@ -118,7 +120,8 @@ function renderExpenses(expenses) {
 }
 
 function calculateTotalExpenses(expenses) {
-  return expenses
+  console.log(expenses)
+  return expenses.expenses
     .reduce((total, expense) => total + parseFloat(expense.amount), 0)
     .toFixed(2);
 }
@@ -146,7 +149,6 @@ window.addEventListener("DOMContentLoaded", async function () {
   const token = localStorage.getItem("token");
   const local = localStorage.getItem("pageNumber");
   console.log(local);
- 
   const decodeToken = parseJwt(token);
   console.log(decodeToken);
   const premiumUser = decodeToken.premiumUser;
@@ -159,12 +161,14 @@ window.addEventListener("DOMContentLoaded", async function () {
       document.getElementById("downloadexpense").removeAttribute("title");
     }
     const response = await axios.get(
-      `http://localhost:8000/expense/get-expense?pagination=${local}`,
+      `http://localhost:8000/expense/get-expense?page=${1}&limit=${local}`,
       { headers: { Authorization: token } }
     );
 
     expenses = response.data;
     renderExpenses(expenses);
+    console.log(response);
+    paginationFunc(response.data.pageData);
     const files = await axios.get('http://localhost:8000/history',
     {headers: { Authorization: token }});
     console.log(files.data);
@@ -299,154 +303,88 @@ window.addEventListener("DOMContentLoaded", async function () {
   };
 });
 
-const total_records = document.getElementById("recordsss"); 
- let pageNumber = 5;
-let  recordsPerPage =2;
-const totalRecords = total_records.length;
-const totalPages = Math.ceil( totalRecords / recordsPerPage);
-
-total_records.onchange=()=>{
-  let pageNumber = document.getElementById("recordsss").value;
-   localStorage.setItem("pageNumber", pageNumber);
-  // console.log(localStorage.getItem("pageNumber"));
-}
-
-
-
-         
+//
+// const total_records = document.getElementById("recordsss");
+// total_records.onchange=()=>{
+//   let pageNumber = document.getElementById("recordsss").value;
+//   localStorage.setItem("pageNumber", pageNumber);
+// }
 // const pages = document.getElementById('pagination');
-// const ul = document.getElementById("expense-list");
-// async function sendGetRequest(page){
-//   try {
-//     const local = localStorage.getItem("pageNumber");
-//       const {data: {expenses, pageData}} = await axios.get(`http://localhost:8000/expense/get-expense?pagination=${local}`,
-//        { headers: { "Authorization": token } });
-  //        const expenseList = document.getElementById("expense-list");
-  // expenseList.innerHTML = "";
-  
-  // expenses.forEach((expense, index) => {
-  //   const item = document.createElement("li");
-  //   item.className =
-  //     "list-group-item d-flex justify-content-between align-items-center";
-  //   item.innerHTML = `
-  //           <span>${expense.description} - ₹ ${expense.amount} on ${expense.category}</span>
-  //           <div>
-  //               <button class="btn btn-sm btn-danger mr-2" onclick="deleteExpense(${index})">Delete</button>
-  //               <button class="btn btn-sm btn-primary" onclick="editExpense(${index})">Edit</button>
-  //           </div>
-  //       `;
-  //   expenseList.appendChild(item);
-  // });
-        //console.log(expenses, pageData);
-        
-//       expenses.forEach((expense,pages)=> {
-//         const item = document.createElement("li");
-//         item.className =
-//       "list-group-item d-flex justify-content-between align-items-center";
-//     item.innerHTML = ``
-//         ul.innerHTML = `<h2>Expenses</h2>`;
-//           renderExpenses(expense);
-//           pages.innerHTML = '';
-//         });
-        
+// const expenseList = document.getElementById("expense-list")
+// async function sendGetRequest(pages){
+//     try {
+//       const local = localStorage.getItem("pageNumber");
+//       const token = localStorage.getItem("token");
+//         const response = await axios.get(`http://localhost:8000/expense/get-expense?page=${pages}&limit=${local}`,
+//          { headers: { "Authorization": token }});
+//          //console.log(response)
+//         const expenses = response.data;
+//          renderExpenses(expenses);
+//        }
+//       catch (err) {
+//           console.log(err);
+//       }
+//   }
 
-//         if(+pageData.previousPage > 0){
-//             console.log(pageData.previousPage, 'type-', typeof (pageData.previousPage), 'typeof', typeof(+pageData.previousPage));
-//             if(+pageData.previousPage > 1){
-//                 pages.innerHTML = `<button id='page1' onclick='sendGetRequest(1)'>1</button>`;
-//             }
-//             pages.innerHTML += `<button id='page${pageData.previousPage}' onclick='sendGetRequest(${pageData.previousPage})'>${pageData.previousPage}</button>`;
-//         }
-//         pages.innerHTML += `<button id='page${pageData.currentPage}' onclick='sendGetRequest(${pageData.currentPage})'>${pageData.currentPage}</button>`;
-//         document.getElementById(`page${page}`).className = 'active';
-//         if(pageData.hasNextPage){
-//             pages.innerHTML += `<button id='page${pageData.nextPage}' onclick='sendGetRequest(${pageData.nextPage})'>${pageData.nextPage}</button>`
-//         }
-//     }
-//     catch (err) {
-//         console.log(err);
-//     }
+// function paginationFunc(pageData) {
+//   const pages = document.getElementById('pagination');
+//   console.log(pageData);
+
+//   if (pageData.hasprePage) {
+//     const previousPage = pageData.currentPage - 1;
+//     pages.innerHTML += `<button id='page${previousPage}' onclick='sendGetRequest(${previousPage})'>${previousPage}</button>`;
+//   }
+//   pages.innerHTML += `<button id='page${pageData.currentPage}' onclick='sendGetRequest(${pageData.currentPage})'>${pageData.currentPage}</button>`;
+//   document.getElementById(`page${pageData.currentPage}`).className = 'active';
+
+//   if (pageData.hasNextPage) {
+//     pages.innerHTML += `<button id='page${pageData.currentPage + 1}' onclick='sendGetRequest(${pageData.currentPage + 1})'>${pageData.currentPage + 1}</button>`;
+//     document.getElementById(`page${pageData.currentPage + 1}`).className = 'active';
+//   } else {
+//     pages.innerHTML += `<button id='page${pageData.currentPage + 1}' disabled>${pageData.currentPage + 1}</button>`;
+//   }
 // }
 
+const pageNumberSelect = document.getElementById("recordsss");
 
+pageNumberSelect.onchange = () => {
+  const pageNumber = pageNumberSelect.value;
+  localStorage.setItem("pageNumber", pageNumber);
+};
 
-
-displayRecords();
-generatePage();
-function displayRecords() {
-  
-  const start_index = (pageNumber - 1) * recordsPerPage;
-  const end_index = start_index + (recordsPerPage - 1);
-  if(end_index>=total_records){
-    end_index=total_records-1;
+async function sendGetRequest(page) {
+  try {
+    const local = localStorage.getItem("pageNumber");
+    const token = localStorage.getItem("token");
+    const response = await axios.get(`http://localhost:8000/expense/get-expense?page=${page}&limit=${local}`, {
+      headers: { "Authorization": token }
+    });
+    //console.log(response);
+    const expenses = response.data;
+    renderExpenses(expenses);
+  } catch (err) {
+    console.log(err);
   }
-  let statement = '';
-  const total_record_items = document.querySelector("#expense-list");
-  
-  for (let i = start_index; i <= end_index; i++) {
-   
-    statement = `${total_record_items.innerHTML}`;
-
-  }
-  total_record_items.innerHTML = statement;
 }
 
-document.querySelectorAll('.dynamic-items').forEach((item)=>{
-  item.classList.remove('active')
-})
-document.getElementById(`page${recordsPerPage}`).classList.add('active')
+function paginationFunc(pageData) {
+  const pagination = document.getElementById('pagination');
+  //console.log(pageData);
 
-
-function generatePage(){
-  let preBtn = `<li class="page-item ${pageNumber === 1 ? 'disabled' : ''}">
-  <a class="page-link" id="preBtn"  onclick="preBtn()" href="javascript:void(0)">Previous</a>
-</li>`;
-let nextBtn = `<li class="page-item ${pageNumber === totalPages ? 'disabled' : ''}">
-  <a class="page-link" id="nextBtn"  onclick="nextBtn()" href="javascript:void(0)">Next</a>
-</li>`;
-
-let buttons ='';
-let activeClass ='';
-for(let i=1;i<= totalPages;i++){
-  if(i==1){
-activeClass = 'active'
+  if (pageData.hasprePage) {
+    let previousPage = pageData.currentPage-1;
+    pagination.innerHTML += `<button id='page${previousPage}'>Previous</button>`;
   }else{
-    activeClass = '';
+    pagination.innerHTML += `<button id='page${pageData.currentPage-1}' onclick='sendGetRequest(${pageData.currentPage})'>Prev</button>`;
   }
-  buttons += `<li class="page-item" dynamic-items ${activeClass} id='page${i}'><a class="page-link" href="javascript:void(0)" onclick="page(${i})">${i}</a></li>`;
-
-}
-document.getElementById('pagination').innerHTML = `${preBtn} ${buttons} ${nextBtn}`
-}
-
- async function nextBtn() {
-  const local = localStorage.getItem("pageNumber");
-  console.log(local);
-  try{
-  const responses = await axios.get(
-    `http://localhost:8000/expense/get-expense?pagination=${local}`,
-    { headers: { Authorization: token } }
-    
-  );
-  console.log(responses);
-  pageNumber++;
-    displayRecords();
-     alert('hi')
-  
- } catch(err){
-  console.log(err);
- }
+  if (pageData.hasNextPage) {
+    let nextPage = pageData.currentPage+1;
+    pagination.innerHTML += `<button id='page${nextPage}}' onclick='sendGetRequest(${nextPage})'>Next</button>`;
+  } else {
+    pagination.innerHTML += `<button id='page${nextPage}' onclick='sendGetRequest(${nextPage})'>Next</button>`;
+  }
 }
 
-function preBtn() {
-  pageNumber--;
-    displayRecords();
-  }
-
-  function page(index){
-    pageNumber = parseInt(index);
-    displayRecords();
-  }
 
 
 
