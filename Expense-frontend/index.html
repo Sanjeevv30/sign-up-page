@@ -11,7 +11,7 @@
       integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
       crossorigin="anonymous"
     />
-    <!-- <link rel="stylesheet" href="style.css"> -->
+    <link rel="stylesheet" href="style.css">
 
     <script
       defer
@@ -60,7 +60,6 @@
           <option value="others">Others</option>
         </select>
       </div>
-      <br />
       <button class="btn btn-primary btn-block"  style="color: rgb(26, 207, 147); background-color: black; border: 2px solid red;"id="add-expense">
         Add Expense
       </button>
@@ -69,10 +68,11 @@
         <label>Records per page:</label>
         <select id="recordsss"
            class="form-select"style="width: 80px;" >
+           <option selected>Choose</option>
           <option>5</option>
           <option >10</option>
           <option >20</option>
-          <option selected >50</option>
+          <option >50</option>
         </select>
       </div>
       <div id="message"></div>
@@ -94,7 +94,7 @@
     <div class="container mt-4 table table-striped" id="expense-list"></div>
 <div class="row">
   <div class="col">
-    <div id="page-details">Shows 1 to 10 of total record</div>
+    <div id="page-details">SHOWING RESULTS</div>
   </div>
   <div class="col" >
     <nav class="d-flex justify-content-center">

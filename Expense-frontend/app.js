@@ -1,8 +1,6 @@
-
-
 let token;
 let expenses = [];
- 
+
 function showPremium() {
   document.getElementById("rzp-button1").style.visibility = "hidden";
   document.getElementById("message").innerHTML = "You are a premium member";
@@ -27,6 +25,11 @@ function showLeaderboard() {
   const inputElement = document.createElement("input");
   inputElement.type = "button";
   inputElement.value = "Show Leaderboard";
+  inputElement.style.backgroundColor = "rgb(26, 207, 147)";
+  inputElement.style.color = "black";
+  inputElement.style.border = "2px solid #ffc107";
+  inputElement.style.padding = "10px 20px";
+  inputElement.style.borderRadius = "6px";
   inputElement.onclick = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -65,7 +68,7 @@ async function saveOrUpdateExpense(index, amount, description, category) {
       expenses.expenses.push(response.data);
     } else {
       const updatedExpense = {
-        id: expenses[index].id,
+        id: expenses.expenses[index].id,
         amount,
         description,
         category,
@@ -84,23 +87,22 @@ async function saveOrUpdateExpense(index, amount, description, category) {
 }
 async function deleteExpense(index) {
   try {
-    const id = expenses[index].id;
+    const id = expenses.expenses[index].id;
     const token = localStorage.getItem("token");
     await axios.delete(`http://localhost:8000/expense/delete/${id}`, {
       headers: { Authorization: token },
     });
-    expenses.splice(index, 1);
+    expenses.expenses.splice(index, 1);
     renderExpenses(expenses);
   } catch (error) {
     console.error("Error deleting expense:", error);
   }
 }
 
-
 function renderExpenses(expenses) {
   const expenseList = document.getElementById("expense-list");
   expenseList.innerHTML = "";
-console.log(expenses)
+  console.log(expenses);
   expenses.expenses.map((expense, index) => {
     const item = document.createElement("li");
     item.className =
@@ -120,14 +122,14 @@ console.log(expenses)
 }
 
 function calculateTotalExpenses(expenses) {
-  console.log(expenses)
+  console.log(expenses);
   return expenses.expenses
     .reduce((total, expense) => total + parseFloat(expense.amount), 0)
     .toFixed(2);
 }
 
 function editExpense(index) {
-  const expense = expenses[index];
+  const expense = expenses.expenses[index];
 
   const expenseAmountInput = document.getElementById("expense-amount");
   const expenseDescriptionInput = document.getElementById(
@@ -145,7 +147,6 @@ function editExpense(index) {
 }
 
 window.addEventListener("DOMContentLoaded", async function () {
-  
   const token = localStorage.getItem("token");
   const local = localStorage.getItem("pageNumber");
   console.log(local);
@@ -153,7 +154,6 @@ window.addEventListener("DOMContentLoaded", async function () {
   console.log(decodeToken);
   const premiumUser = decodeToken.premiumUser;
   try {
-    
     if (premiumUser) {
       showPremium();
       showLeaderboard();
@@ -169,19 +169,25 @@ window.addEventListener("DOMContentLoaded", async function () {
     renderExpenses(expenses);
     console.log(response);
     paginationFunc(response.data.pageData);
-    const files = await axios.get('http://localhost:8000/history',
-    {headers: { Authorization: token }});
+    const files = await axios.get("http://localhost:8000/history", {
+      headers: { Authorization: token },
+    });
     console.log(files.data);
     const expenseList = document.getElementById("expense-list");
-    files.data.forEach((filesUrl,index)=>{
-     
+    files.data.forEach((filesUrl, index) => {
       const items = document.createElement("li");
       items.className =
-      "list-group-item d-flex justify-content-between align-items-center";
-      items.innerHTML = `
-            <span><a href="${filesUrl.url}"> Previous Data ${index +1 }</a></span>`
-            expenseList.appendChild(items);
-    })
+        "list-group-item d-flex justify-content-between align-items-center";
+        items.innerHTML = `
+        <span>
+          <a href="${filesUrl.url}" style="text-decoration:none; color: #007bff; padding: 4px 8px; border: 1px solid #007bff; border-radius: 4px;">
+            Previous Data ${index + 1}
+          </a>
+        </span>
+      `;
+      
+      expenseList.appendChild(items);
+    });
   } catch (error) {
     console.log("Error fetching expenses:", error);
   }
@@ -222,7 +228,6 @@ window.addEventListener("DOMContentLoaded", async function () {
   document.getElementById("downloadexpense").onclick =
     async function download() {
       try {
-        
         const response = await axios.get("http://localhost:8000/download", {
           headers: { Authorization: token },
         });
@@ -302,49 +307,6 @@ window.addEventListener("DOMContentLoaded", async function () {
     });
   };
 });
-
-//
-// const total_records = document.getElementById("recordsss");
-// total_records.onchange=()=>{
-//   let pageNumber = document.getElementById("recordsss").value;
-//   localStorage.setItem("pageNumber", pageNumber);
-// }
-// const pages = document.getElementById('pagination');
-// const expenseList = document.getElementById("expense-list")
-// async function sendGetRequest(pages){
-//     try {
-//       const local = localStorage.getItem("pageNumber");
-//       const token = localStorage.getItem("token");
-//         const response = await axios.get(`http://localhost:8000/expense/get-expense?page=${pages}&limit=${local}`,
-//          { headers: { "Authorization": token }});
-//          //console.log(response)
-//         const expenses = response.data;
-//          renderExpenses(expenses);
-//        }
-//       catch (err) {
-//           console.log(err);
-//       }
-//   }
-
-// function paginationFunc(pageData) {
-//   const pages = document.getElementById('pagination');
-//   console.log(pageData);
-
-//   if (pageData.hasprePage) {
-//     const previousPage = pageData.currentPage - 1;
-//     pages.innerHTML += `<button id='page${previousPage}' onclick='sendGetRequest(${previousPage})'>${previousPage}</button>`;
-//   }
-//   pages.innerHTML += `<button id='page${pageData.currentPage}' onclick='sendGetRequest(${pageData.currentPage})'>${pageData.currentPage}</button>`;
-//   document.getElementById(`page${pageData.currentPage}`).className = 'active';
-
-//   if (pageData.hasNextPage) {
-//     pages.innerHTML += `<button id='page${pageData.currentPage + 1}' onclick='sendGetRequest(${pageData.currentPage + 1})'>${pageData.currentPage + 1}</button>`;
-//     document.getElementById(`page${pageData.currentPage + 1}`).className = 'active';
-//   } else {
-//     pages.innerHTML += `<button id='page${pageData.currentPage + 1}' disabled>${pageData.currentPage + 1}</button>`;
-//   }
-// }
-
 const pageNumberSelect = document.getElementById("recordsss");
 
 pageNumberSelect.onchange = () => {
@@ -356,10 +318,12 @@ async function sendGetRequest(page) {
   try {
     const local = localStorage.getItem("pageNumber");
     const token = localStorage.getItem("token");
-    const response = await axios.get(`http://localhost:8000/expense/get-expense?page=${page}&limit=${local}`, {
-      headers: { "Authorization": token }
-    });
-    //console.log(response);
+    const response = await axios.get(
+      `http://localhost:8000/expense/get-expense?page=${page}&limit=${local}`,
+      {
+        headers: { Authorization: token },
+      }
+    );
     const expenses = response.data;
     renderExpenses(expenses);
   } catch (err) {
@@ -368,36 +332,22 @@ async function sendGetRequest(page) {
 }
 
 function paginationFunc(pageData) {
-  const pagination = document.getElementById('pagination');
-  //console.log(pageData);
+  const pages = document.getElementById("pagination");
+  pages.innerHTML = "";
 
-  if (pageData.hasprePage) {
-    let previousPage = pageData.currentPage-1;
-    pagination.innerHTML += `<button id='page${previousPage}'>Previous</button>`;
-  }else{
-    pagination.innerHTML += `<button id='page${pageData.currentPage-1}' onclick='sendGetRequest(${pageData.currentPage})'>Prev</button>`;
+  for (let i = 1; i <= pageData.lastPage; i++) {
+    if (i === pageData.currentPage) {
+      pages.innerHTML += `<button id='page${i}' class='active' onclick='sendGetRequest(${i})'>${i}</button>`;
+    } else {
+      pages.innerHTML += `<button id='page${i}' onclick='sendGetRequest(${i})'>${i}</button>`;
+    }
   }
-  if (pageData.hasNextPage) {
-    let nextPage = pageData.currentPage+1;
-    pagination.innerHTML += `<button id='page${nextPage}}' onclick='sendGetRequest(${nextPage})'>Next</button>`;
-  } else {
-    pagination.innerHTML += `<button id='page${nextPage}' onclick='sendGetRequest(${nextPage})'>Next</button>`;
-  }
+
+  const paginationButtons = document.querySelectorAll("#pagination button");
+  paginationButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      paginationButtons.forEach((btn) => btn.classList.remove("active"));
+      this.classList.add("active");
+    });
+  });
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -21,6 +21,7 @@ router.get('/history',authentication.authenticate,expenseController.getAllFileUr
 
 router.get("/expense/get-expense",authentication.authenticate, expenseController.getAllExpenses);
 
+
 router.delete("/expense/delete/:Id",authentication.authenticate,expenseController.deleteExpense);
 
 router.put("/expense/edit/:Id", expenseController.updateExpense);
