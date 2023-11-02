@@ -12,7 +12,7 @@ dotenv.config();
 const sendResetPasswordEmail = (id) => {
   const Client = Sib.ApiClient.instance;
   var apiKey = Client.authentications["api-key"];
-  console.log(process.env.API_KEY);
+  //console.log(process.env.API_KEY);
   apiKey.apiKey = process.env.API_KEY;
   const sender = {
     email: "srivassaroj39@gmail.com",
