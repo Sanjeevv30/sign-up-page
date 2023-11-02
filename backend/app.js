@@ -1,8 +1,9 @@
 const express = require("express");
-const path = require('path')
-const fs = require('fs')
+const path = require("path");
+const fs = require("fs");
 const app = express();
 const dotenv = require("dotenv");
+dotenv.config();
 const Expense = require("./models/expense");
 const premiumFeatureRoutes = require("./routes/premiumFeature");
 const cors = require("cors");
@@ -13,16 +14,17 @@ const userRouter = require("./routes/userRouter");
 const Forgotpassword = require("./models/forgotpassword");
 const resetPasswordRoutes = require("./routes/resetpasswords");
 const FileUrl = require("./models/FileUrl");
-const helmet = require('helmet');
-const morgan = require('morgan');
+const helmet = require("helmet");
+const morgan = require("morgan");
 
 const Order = require("./models/orders");
 const purchaseRoutes = require("./routes/purchaseRoute");
-const accessLogStream = fs.createWriteStream(path.join(__dirname,
-  'access.log'),
-{flag:'a'});
+const accessLogStream = fs.createWriteStream(
+  path.join(__dirname, "access.log"),
+  { flag: "a" }
+);
 app.use(helmet());
-app.use(morgan('combined',{stream:accessLogStream}));
+app.use(morgan("combined", { stream: accessLogStream }));
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -31,7 +33,6 @@ app.use("/", userRouter);
 app.use("/purchase", purchaseRoutes);
 app.use("/premium", premiumFeatureRoutes);
 app.use("/password", resetPasswordRoutes);
-
 
 User.hasMany(Expense);
 Expense.belongsTo(User);
@@ -52,7 +53,7 @@ User.sync();
 sequelize
   .sync()
   .then((result) => {
-    app.listen(process.env.PORT||8000 , () => {
+    app.listen(process.env.PORT || 8000, () => {
       console.log("Server is running on port 8000");
     });
   })

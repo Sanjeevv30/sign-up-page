@@ -110,11 +110,11 @@ exports.getAllExpenses = async (req, res, next) => {
     });
     const [expenses] = await Promise.all([promise1]);
 
-    console.log(
-      "Check for premiumUser",
-      req.user.premiumUser,
-      req.user.premiumUser === true
-    );
+    // console.log(
+    //   "Check for premiumUser",
+    //   req.user.premiumUser,
+    //   req.user.premiumUser === true
+    // );
 
     res.json({ expenses, pageData, premium: req.user.premiumUser });
   } catch (error) {
@@ -126,7 +126,7 @@ exports.getAllExpenses = async (req, res, next) => {
 exports.getAllFileUrls = async (req, res, next) => {
   try {
     findurl = await req.user.getFileUrls();
-    console.log("files", findurl);
+    //console.log("files", findurl);
     res.json(findurl);
   } catch (error) {
     console.log("Error retrieving expenses:", error);
