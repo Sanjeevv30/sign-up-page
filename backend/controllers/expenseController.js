@@ -5,8 +5,6 @@ const { v1: uuidv1 } = require("uuid");
 const UserServices = require("../services/userservice");
 const S3Services = require("../services/S3services");
 const FileUrl = require("../models/FileUrl");
-const { query } = require("express");
-
 exports.downloadExpenses = async (req, res) => {
   try {
     const expenses = await UserServices.getExpenses(req);
