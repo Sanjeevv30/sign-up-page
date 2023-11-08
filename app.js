@@ -4,27 +4,21 @@ const fs = require("fs");
 const app = express();
 const dotenv = require("dotenv");
 dotenv.config();
-const Expense = require("./models/expense");
-const premiumFeatureRoutes = require("./routes/premiumFeature");
+const Expense = require("./backend/models/expense");
+const premiumFeatureRoutes = require("./backend/routes/premiumFeature");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const sequelize = require("./util/database");
-const User = require("./models/user");
-const userRouter = require("./routes/userRouter");
-const Forgotpassword = require("./models/forgotpassword");
-const resetPasswordRoutes = require("./routes/resetpasswords");
-const FileUrl = require("./models/FileUrl");
-const helmet = require("helmet");
-const morgan = require("morgan");
+const sequelize = require("./backend/util/database");
+const User = require("./backend/models/user");
+const userRouter = require("./backend/routes/userRouter");
+const Forgotpassword = require("./backend/models/forgotpassword");
+const resetPasswordRoutes = require("./backend/routes/resetpasswords");
+const FileUrl = require("./backend/models/FileUrl");
 
-const Order = require("./models/orders");
-const purchaseRoutes = require("./routes/purchaseRoute");
-const accessLogStream = fs.createWriteStream(
-  path.join(__dirname, "access.log"),
-  { flag: "a" }
-);
-app.use(helmet());
-app.use(morgan("combined", { stream: accessLogStream }));
+
+const Order = require("./backend/models/orders");
+const purchaseRoutes = require("./backend/routes/purchaseRoute");
+
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
