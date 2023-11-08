@@ -10,6 +10,6 @@ exports.authenticate = async(req,res,next)=>{
        // console.log("First user",user);
         next();
     }catch(err){
-        res.status(500).json(err)
+      return  res.status(500).json({Message:"Failed ",err})
     }
 }
