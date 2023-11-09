@@ -14,22 +14,57 @@ const User= require('../models/user');
 //        return  res.status(500).json({Message:'err',err})
 //     }
 // }
+
+
+
 exports.authenticate = async(req,res,next)=>{
     try{
 const token = req.headers.authorization;
 const secretKey = 'secretKey';
-const decodedId = jwt.verify(token, secretKey);
-const loggedInUserData = await User.findOne({ _id: decodedId.userId });
+const payload = jwt.verify(token, secretKey);
+const loggedInUserData = await User.findOne({where:{id:payload.userId}});
 if (!loggedInUserData) {
     return res.status(401).json({ error: "User not found" });
 }
 req.user = loggedInUserData;
 next();
 } catch (error) {
-    console.error("Authentication error:", error);
-    res.status(500).json({ error: "Error in the Authentication" });
+    console.log("Authentication error:", error);
+     return res.status(500).json({ message: "Error in the Authentication" });
 }
 };
+
+
+
+
+
+
+// exports.authenticate = async (req, res, next) => {
+
+//     try {
+//         console.log('Authorization header:', req.headers.authorization);
+
+//         const token = req.headers.authorization;
+//         const secretKey = 'secretKey';
+
+//         if (!token) {
+//             return res.status(401).json({ error: 'Unauthorized - No token provided' });
+//         }
+
+//         const decodedId = jwt.verify(token, secretKey);
+//         const loggedInUserData = await User.findOne({_id: decodedId.userId });
+
+//         if (!loggedInUserData) {
+//             return res.status(401).json({ error: 'User not found' });
+//         }
+//         req.user = loggedInUserData;
+//         next();
+//     } catch (error) {
+//         console.error('Authentication error:', error);
+//         res.status(500).json({ success: false });
+//     }
+// };
+
 
 
 

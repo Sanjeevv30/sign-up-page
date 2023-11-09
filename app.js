@@ -24,15 +24,19 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 
+app.use("/check", function(){
+  console.log("hello")
+});
+
 app.use("/", userRouter);
 app.use("/purchase", purchaseRoutes);
 app.use("/premium", premiumFeatureRoutes);
 app.use("/password", resetPasswordRoutes);
 
-app.use((req, res) => {
-	console.log(`Requested URL: ${req.url}`);
-	res.sendFile(path.join(__dirname, `/public/${req.url}`));
-});
+// app.use((req, res) => {
+// 	console.log(`Requested URL: ${req.url}`);
+// 	res.sendFile(path.join(__dirname, `/public/${req.url}`));
+// });
 
 User.hasMany(Expense);
 Expense.belongsTo(User);
