@@ -34,7 +34,7 @@ function showLeaderboard() {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "http://localhost:8000/premium/showLeaderBoard",
+        "http://16.16.63.197:8000/premium/showLeaderBoard",
         {
           headers: { Authorization: token },
         }
@@ -61,7 +61,7 @@ async function saveOrUpdateExpense(index, amount, description, category) {
       const newExpense = { amount, description, category };
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "http://localhost:8000/expense/add-expense",
+        "http://16.16.63.197:8000/expense/add-expense",
         newExpense,
         { headers: { Authorization: token } }
       );
@@ -74,12 +74,11 @@ async function saveOrUpdateExpense(index, amount, description, category) {
         category,
       };
       await axios.put(
-        `http://localhost:8000/expense/edit/${updatedExpense.id}`,
+        `http://16.16.63.197:8000/expense/edit/${updatedExpense.id}`,
         updatedExpense
       );
       expenses[index] = updatedExpense;
     }
-
     renderExpenses(expenses);
   } catch (error) {
     console.error("Error saving/updating expense:", error);
@@ -89,7 +88,7 @@ async function deleteExpense(index) {
   try {
     const id = expenses.expenses[index].id;
     const token = localStorage.getItem("token");
-    await axios.delete(`http://localhost:8000/expense/delete/${id}`, {
+    await axios.delete(`http://16.16.63.197:8000/expense/delete/${id}`, {
       headers: { Authorization: token },
     });
     expenses.expenses.splice(index, 1);
@@ -161,7 +160,7 @@ window.addEventListener("DOMContentLoaded", async function () {
       document.getElementById("downloadexpense").removeAttribute("title");
     }
     const response = await axios.get(
-      `http://localhost:8000/expense/get-expense?page=${1}&limit=${local}`,
+      `http://16.16.63.197:8000/expense/get-expense?page=${1}&limit=${local}`,
       { headers: { Authorization: token } }
     );
 
@@ -169,7 +168,7 @@ window.addEventListener("DOMContentLoaded", async function () {
     renderExpenses(expenses);
     console.log(response);
     paginationFunc(response.data.pageData);
-    const files = await axios.get("http://localhost:8000/history", {
+    const files = await axios.get("http://16.16.63.197:8000/history", {
       headers: { Authorization: token },
     });
     console.log(files.data);
@@ -228,7 +227,7 @@ window.addEventListener("DOMContentLoaded", async function () {
   document.getElementById("downloadexpense").onclick =
     async function download() {
       try {
-        const response = await axios.get("http://localhost:8000/download", {
+        const response = await axios.get("http://16.16.63.197:8000/download", {
           headers: { Authorization: token },
         });
 
@@ -255,7 +254,7 @@ window.addEventListener("DOMContentLoaded", async function () {
   document.getElementById("rzp-button1").onclick = async function (e) {
     const token = localStorage.getItem("token");
     const response = await axios.get(
-      "http://localhost:8000/purchase/premiummembership",
+      "http://16.16.63.197:8000/purchase/premiummembership",
       { headers: { Authorization: token } }
     );
     console.log(response);
@@ -276,7 +275,7 @@ window.addEventListener("DOMContentLoaded", async function () {
       },
       handler: async function (response) {
         const res = await axios.post(
-          "http://localhost:8000/purchase/updatetransactionstatus",
+          "http://16.16.63.197:8000/purchase/updatetransactionstatus",
           {
             order_id: options.order_id,
             payment_id: response.razorpay_payment_id,
@@ -319,7 +318,7 @@ async function sendGetRequest(page) {
     const local = localStorage.getItem("pageNumber");
     const token = localStorage.getItem("token");
     const response = await axios.get(
-      `http://localhost:8000/expense/get-expense?page=${page}&limit=${local}`,
+      `http://16.16.63.197:8000/expense/get-expense?page=${page}&limit=${local}`,
       {
         headers: { Authorization: token },
       }
