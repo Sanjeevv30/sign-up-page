@@ -1,10 +1,8 @@
 const uuid = require("uuid");
-//const sgMail = require("@sendgrid/mail");
 const bcrypt = require("bcrypt");
-const sequelize = require("../util/database");
-var Sib = require("sib-api-v3-sdk");
+const Sib = require("sib-api-v3-sdk");
 const User = require("../models/user");
-const Forgotpassword = require("../models/forgotpassword");
+const forgotPasswordHandler = require("../models/forgot-Password");
 
 const dotenv = require("dotenv");
 dotenv.config();
@@ -12,7 +10,6 @@ dotenv.config();
 const sendResetPasswordEmail = (id) => {
   const Client = Sib.ApiClient.instance;
   var apiKey = Client.authentications["api-key"];
-  console.log(process.env.API_KEY);
   apiKey.apiKey = process.env.API_KEY;
   const sender = {
     email: "srivassaroj39@gmail.com",
@@ -31,7 +28,7 @@ const sendResetPasswordEmail = (id) => {
     to: receivers,
     subject: "Reset Password",
     text: "Reset your password",
-    htmlContent: `<a href="http://localhost:8000/password/forgotpassword/${id}">Reset password</a>`,
+    htmlContent: `<a href="http://localhost:8000/forgot-password/${id}">Reset password</a>`,
   };
 
   return transEmailApi
@@ -46,7 +43,7 @@ const sendResetPasswordEmail = (id) => {
     });
 };
 
-const forgotpassword = async (req, res) => {
+const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -57,9 +54,9 @@ const forgotpassword = async (req, res) => {
 
     if (user) {
       const id = uuid.v4();
-      await user.createForgotpassword({ id, active: true });
+      await user.createForgotPassword({ id, active: true });
       const restore = await sendResetPasswordEmail(id);
-      console.log("Errorrrrrrr", restore);
+
       if (restore !== undefined) {
         return res.json({
           message: "Link to reset password sent to your email",
@@ -75,23 +72,23 @@ const forgotpassword = async (req, res) => {
   }
 };
 
-const resetpassword = (req, res) => {
+const resetPassword = (req, res) => {
   const id = req.params.id;
 
-  Forgotpassword.findOne({ where: { id } }).then((forgotpasswordrequest) => {
-    if (forgotpasswordrequest) {
-      forgotpasswordrequest.update({ active: false });
+  forgotPasswordHandler.findOne({ where: { id } }).then((forgotPasswordRequest) => {
+    if (forgotPasswordRequest) {
+      forgotPasswordRequest.update({ active: false });
       res.send(`
         <html>
         <script>
-        function formsubmitted(e){
+        function formSubmitted(e){
             e.preventDefault();
             console.log('called')
         }
     </script>
-    <form action="/password/updatepassword/${id}" method="get">
-        <label for="newpassword">Enter New password</label>
-        <input name="newpassword" type="password" required></input>
+    <form action="/password/update-password/${id}" method="get">
+        <label for="newPassword">Enter New password</label>
+        <input name="newPassword" type="password" required></input>
         <button>reset password</button>
     </form>
         </html>
@@ -100,30 +97,30 @@ const resetpassword = (req, res) => {
   });
 };
 
-const updatepassword = async (req, res) => {
+const updatePassword = async (req, res) => {
   try {
-    const { newpassword } = req.query;
-    const resetpasswordid = req.params.id;
+    const { newPassword } = req.query;
+    const resetPasswordId = req.params.id;
 
-    const resetpasswordrequest = await Forgotpassword.findOne({
-      where: { id: resetpasswordid },
+    const resetPasswordRequest = await forgotPasswordHandler.findOne({
+      where: { id: resetPasswordId },
     });
 
-    if (!resetpasswordrequest) {
+    if (!resetPasswordRequest) {
       return res
         .status(404)
         .json({ error: "Forgot password request not found", success: false });
     }
 
     const user = await User.findOne({
-      where: { id: resetpasswordrequest.trackerId },
+      where: { id: resetPasswordRequest.trackerId },
     });
 
     if (!user) {
       return res.status(404).json({ error: "User not found", success: false });
     }
     const saltRounds = 10;
-    const hash = await bcrypt.hash(newpassword, saltRounds);
+    const hash = await bcrypt.hash(newPassword, saltRounds);
 
     await user.update({ password: hash });
 
@@ -136,7 +133,7 @@ const updatepassword = async (req, res) => {
 };
 
 module.exports = {
-  forgotpassword,
-  updatepassword,
-  resetpassword,
+  forgotPassword,
+  updatePassword,
+  resetPassword,
 };

@@ -1,14 +1,14 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../util/database');
 
-const Forgotpassword = sequelize.define('forgotpassword', {
+const forgotPassword = sequelize.define('forgotPassword', {
     id: {
         type: Sequelize.UUID,
         allowNull: false,
         primaryKey: true
     },
     active: Sequelize.BOOLEAN,
-    expiresby: Sequelize.DATE
+    expiresBy: Sequelize.DATE
 })
 
-module.exports = Forgotpassword;
+module.exports = forgotPassword;

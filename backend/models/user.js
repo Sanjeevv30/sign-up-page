@@ -18,7 +18,7 @@ const User = sequelize.define("tracker", {
     type: Sequelize.STRING,
     allowNull: false,
   },
-  premiumUser: Sequelize.BOOLEAN,
+  isPremiumUser: Sequelize.BOOLEAN,
   totalExpenses: {
     type: Sequelize.INTEGER,
     defaultValue: 0,

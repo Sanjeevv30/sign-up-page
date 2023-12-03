@@ -2,7 +2,7 @@ const Expense = require("../models/expense");
 const User = require("../models/user");
 const sequelize = require("../util/database");
 const { v1: uuidv1 } = require("uuid");
-const UserServices = require("../services/userservice");
+const UserServices = require("../services/userService");
 const S3Services = require("../services/S3services");
 const FileUrl = require("../models/FileUrl");
 exports.downloadExpenses = async (req, res) => {
@@ -59,25 +59,9 @@ exports.createExpense = async (req, res, next) => {
     res.status(500).json({ error: "Server error" });
   }
 };
-
-// exports.getAllExpenses = async (req, res, next) => {
-//   try {
-//     // const Pagination = req.query.pagination;
-//     // console.log(Pagination);
-//     const Pagination = req.query.pagination;
-//     if (Pagination === null || Pagination === undefined || isNaN(Pagination)) {
-//       return res.status(400).json({ error: "Invalid or missing Pagination value" });
-//     }
-//     const expenses = await req.user.getExpenses({limit:parseInt(Pagination)});
-//     res.json(expenses);
-//   } catch (error) {
-//     console.log("Error retrieving expenses:", error);
-//     res.status(500).json({ error: "Server error" });
-//   }
-// };
 exports.getAllExpenses = async (req, res, next) => {
   try {
-    //console.log(req.query);
+    
     const page = parseInt(req.query.page);
     const limit = parseInt(req.query.limit);
 
@@ -85,11 +69,11 @@ exports.getAllExpenses = async (req, res, next) => {
       return res.status(400).json({ error: "Invalid page value" });
     }
     const total = await Expense.count({ where: { trackerId: req.user.id } });
-    //console.log("total", total);
-    let hasprePage = false;
+    
+    let hasPrePage = false;
     let hasNextPage = false;
     if (page !== 1) {
-      hasprePage = true;
+      hasPrePage = true;
     }
     if (page * limit < total) {
       hasNextPage = true;
@@ -99,7 +83,7 @@ exports.getAllExpenses = async (req, res, next) => {
       currentPage: page,
       lastPage: Math.ceil(total / limit),
       hasNextPage: hasNextPage,
-      hasprePage: hasprePage,
+      hasPrePage: hasPrePage,
     };
 
     const promise1 = req.user.getExpenses({
@@ -107,13 +91,6 @@ exports.getAllExpenses = async (req, res, next) => {
       limit: limit,
     });
     const [expenses] = await Promise.all([promise1]);
-
-    // console.log(
-    //   "Check for premiumUser",
-    //   req.user.premiumUser,
-    //   req.user.premiumUser === true
-    // );
-
     res.json({ expenses, pageData, premium: req.user.premiumUser });
   } catch (error) {
     console.log("Error retrieving expenses:", error);
@@ -123,9 +100,8 @@ exports.getAllExpenses = async (req, res, next) => {
 
 exports.getAllFileUrls = async (req, res, next) => {
   try {
-    findurl = await req.user.getFileUrls();
-    //console.log("files", findurl);
-    res.json(findurl);
+    findUrl = await req.user.getFileUrls();
+    res.json(findUrl);
   } catch (error) {
     console.log("Error retrieving expenses:", error);
     res.status(500).json({ error: "Server error" });

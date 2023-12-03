@@ -15,7 +15,7 @@ const getUserLeaderBoard = async (req, res) => {
 exports.getDownloads = async function (req,res,next){
   try{
     const file = await req.user.downloadExpenses();
-    res.json({file,premium:req.user.premiumUser})
+    res.json({file,premium:req.user.isPremiumUser})
 
   }catch(err){
     res.status.json({message:"not downloaded"});

@@ -3,8 +3,8 @@ const util = require("../util/database");
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 
-exports.generateJWT = (id, name, premiumUser) => {
-  return jwt.sign({ userId: id, name: name, premiumUser: premiumUser }, 'secretKey');
+exports.generateJWT = (id, name, isPremiumUser) => {
+  return jwt.sign({ userId: id, name: name, isPremiumUser: isPremiumUser }, 'secretKey');
 };
 function isInputInvalid(e) {
   if (e == null || e == undefined || e.length == 0) {
@@ -67,7 +67,7 @@ exports.createLogin = async (req, res, next) => {
           console.log("first error", resp);
           return res
             .status(201)
-            .json({ message: "User login Successful", user, token: exports.generateJWT(user[0].id, user[0].name, user[0].premiumUser)
+            .json({ message: "User login Successful", user, token: exports.generateJWT(user[0].id, user[0].name, user[0].isPremiumUser)
           });
         } else {
           console.log(resp);

@@ -1,10 +1,10 @@
-const Razorpay = require("razorpay");
-const Order = require("../models/orders");
+const RazorPay = require("razorpay");
+const Order = require("../models/order");
 const userController = require('../controllers/userController')
 
-const purchasepremium = async (req, res) => {
+const purchasePremium = async (req, res) => {
   try {
-    var rzp = new Razorpay({
+    var rzp = new RazorPay({
       key_id: process.env.RAZORPAY_KEY_ID,
       key_secret: process.env.RAZORPAY_KEY_SECRET,
     });
@@ -14,7 +14,7 @@ const purchasepremium = async (req, res) => {
         throw new Error(JSON.stringify(err));
       }
       req.user
-        .createOrder({ orderid: order.id, status:"PENDING"})
+        .createOrder({ orderId: order.id, status:"PENDING"})
         .then(() => {
           return res.status(201).json({ order, key_id: rzp.key_id });
         })
@@ -28,18 +28,18 @@ const purchasepremium = async (req, res) => {
   }
 };
 
-const updatetransactionstatus = async (req, res) => {
+const updateTransactionStatus = async (req, res) => {
   try {
     const { payment_id, order_id } = req.body;
 
     console.log("order_id:", order_id);
 
-    const order = await Order.findOne({ where: { orderid: order_id } });
+    const order = await Order.findOne({ where: { orderId: order_id } });
     const promise1 = order.update({
-      paymentid: payment_id,
+      paymentId: payment_id,
       status: "SUCCESSFUL",
     });
-    const promise2 = req.user.update({ premiumUser: true });
+    const promise2 = req.user.update({ isPremiumUser: true });
     Promise.all([promise1, promise2])
       .then(() => {
         return res
@@ -55,6 +55,6 @@ const updatetransactionstatus = async (req, res) => {
   }
 };
 module.exports = {
-  purchasepremium,
-  updatetransactionstatus,
+  purchasePremium,
+  updateTransactionStatus,
 };

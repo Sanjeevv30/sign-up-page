@@ -1,4 +1,4 @@
-async function forgotpassword(e) {
+async function forgotPassword(e) {
   try {
     e.preventDefault();
 
@@ -10,7 +10,7 @@ async function forgotpassword(e) {
     console.log("User Details:", userDetails);
 
     const response = await axios.post(
-      "http://localhost:8000/password/forgotpassword",
+      "http://localhost:8000/password/forgot-password",
       userDetails
     );
 

@@ -11,12 +11,12 @@ const bodyParser = require("body-parser");
 const sequelize = require("./util/database");
 const User = require("./models/user");
 const userRouter = require("./routes/userRouter");
-const Forgotpassword = require("./models/forgotpassword");
-const resetPasswordRoutes = require("./routes/resetpasswords");
+const forgotPassword = require("./models/forgot-Password");
+const resetPasswordRoutes = require("./routes/reset-passwords");
 const FileUrl = require("./models/FileUrl");
 
 
-const Order = require("./models/orders");
+const Order = require("./models/order");
 const purchaseRoutes = require("./routes/purchaseRoute");
 
 app.use(cors());
@@ -41,8 +41,8 @@ app.use((req, res) => {
 User.hasMany(Expense);
 Expense.belongsTo(User);
 
-User.hasMany(Forgotpassword);
-Forgotpassword.belongsTo(User);
+User.hasMany(forgotPassword);
+forgotPassword.belongsTo(User);
 
 User.hasMany(Order);
 Order.belongsTo(User);
@@ -50,7 +50,7 @@ Order.belongsTo(User);
 User.hasMany(FileUrl);
 FileUrl.belongsTo(User);
 
-Forgotpassword.sync();
+forgotPassword.sync();
 FileUrl.sync();
 Order.sync();
 User.sync();

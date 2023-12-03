@@ -21,10 +21,10 @@ function parseJwt(token) {
 
   return JSON.parse(jsonPayload);
 }
-function showLeaderboard() {
+function showLeaderBoard() {
   const inputElement = document.createElement("input");
   inputElement.type = "button";
-  inputElement.value = "Show Leaderboard";
+  inputElement.value = "Show LeaderBoard";
   inputElement.style.backgroundColor = "rgb(26, 207, 147)";
   inputElement.style.color = "black";
   inputElement.style.border = "2px solid #ffc107";
@@ -41,14 +41,14 @@ function showLeaderboard() {
       );
       const userLeaderBoardArray = response.data;
 
-      var LeaderboardElem = document.getElementById("leaderboard");
-      LeaderboardElem.innerHTML = "<h1>Leader Board</h1>";
+      var LeaderBoardElem = document.getElementById("leaderBoard");
+      LeaderBoardElem.innerHTML = "<h1>Leader Board</h1>";
 
       userLeaderBoardArray.forEach((userDetails) => {
-        LeaderboardElem.innerHTML += `<li>- Name:  ${userDetails.name} , Total Expenses : ₹ ${userDetails.totalExpenses}</li>`;
+        LeaderBoardElem.innerHTML += `<li>- Name:  ${userDetails.name} , Total Expenses : ₹ ${userDetails.totalExpenses}</li>`;
       });
     } catch (error) {
-      console.error("Error fetching leaderboard:", error);
+      console.error("Error fetching leaderBoard:", error);
     }
   };
 
@@ -155,15 +155,14 @@ window.addEventListener("DOMContentLoaded", async function () {
   try {
     if (premiumUser) {
       showPremium();
-      showLeaderboard();
-      document.getElementById("downloadexpense").removeAttribute("disabled");
-      document.getElementById("downloadexpense").removeAttribute("title");
+      showLeaderBoard();
+      document.getElementById("downloadExpense").removeAttribute("disabled");
+      document.getElementById("downloadExpense").removeAttribute("title");
     }
     const response = await axios.get(
       `http://16.16.63.197:8000/expense/get-expense?page=${1}&limit=${local}`,
       { headers: { Authorization: token } }
     );
-
     expenses = response.data;
     renderExpenses(expenses);
     console.log(response);
@@ -184,7 +183,6 @@ window.addEventListener("DOMContentLoaded", async function () {
           </a>
         </span>
       `;
-      
       expenseList.appendChild(items);
     });
   } catch (error) {
@@ -224,7 +222,7 @@ window.addEventListener("DOMContentLoaded", async function () {
     document.getElementById("expense-description").value = "";
   });
 
-  document.getElementById("downloadexpense").onclick =
+  document.getElementById("downloadExpense").onclick =
     async function download() {
       try {
         const response = await axios.get("http://16.16.63.197:8000/download", {
@@ -236,7 +234,7 @@ window.addEventListener("DOMContentLoaded", async function () {
           //console.log('File URL:', fileURL);
           const a = document.createElement("a");
           a.href = fileURL;
-          a.download = "myexpense.csv";
+          a.download = "myExpense.csv";
           a.click();
         } else {
           throw new Error(response.data.message);
@@ -254,7 +252,7 @@ window.addEventListener("DOMContentLoaded", async function () {
   document.getElementById("rzp-button1").onclick = async function (e) {
     const token = localStorage.getItem("token");
     const response = await axios.get(
-      "http://16.16.63.197:8000/purchase/premiummembership",
+      "http://16.16.63.197:8000/purchase/premiumMembership",
       { headers: { Authorization: token } }
     );
     console.log(response);
@@ -275,10 +273,10 @@ window.addEventListener("DOMContentLoaded", async function () {
       },
       handler: async function (response) {
         const res = await axios.post(
-          "http://16.16.63.197:8000/purchase/updatetransactionstatus",
+          "http://16.16.63.197:8000/purchase/updateTransactionStatus",
           {
             order_id: options.order_id,
-            payment_id: response.razorpay_payment_id,
+            payment_id: response.razorPay_payment_id,
           },
           { headers: { Authorization: token } }
         );
@@ -287,7 +285,7 @@ window.addEventListener("DOMContentLoaded", async function () {
         document.getElementById("rzp-button1").style.visibility = "hidden";
         document.getElementById("message").innerHTML =
           "You are a premium member";
-        showLeaderboard();
+        showLeaderBoard();
         localStorage.setItem("token", res.data.token);
       },
     };
