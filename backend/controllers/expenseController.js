@@ -61,7 +61,6 @@ exports.createExpense = async (req, res, next) => {
 };
 exports.getAllExpenses = async (req, res, next) => {
   try {
-    
     const page = parseInt(req.query.page);
     const limit = parseInt(req.query.limit);
 
@@ -69,7 +68,7 @@ exports.getAllExpenses = async (req, res, next) => {
       return res.status(400).json({ error: "Invalid page value" });
     }
     const total = await Expense.count({ where: { trackerId: req.user.id } });
-    
+
     let hasPrePage = false;
     let hasNextPage = false;
     if (page !== 1) {
