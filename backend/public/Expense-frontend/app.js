@@ -34,7 +34,7 @@ function showLeaderBoard() {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "http://16.16.63.197:8000/premium/showLeaderBoard",
+        "http://localhost:8000/premium/showLeaderBoard",
         {
           headers: { Authorization: token },
         }
@@ -61,20 +61,20 @@ async function saveOrUpdateExpense(index, amount, description, category) {
       const newExpense = { amount, description, category };
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "http://16.16.63.197:8000/expense/add-expense",
+        "http://localhost:8000/expense/add-expense",
         newExpense,
         { headers: { Authorization: token } }
       );
       expenses.expenses.push(response.data);
     } else {
       const updatedExpense = {
-        id: expenses.expenses[index].id,
+        id: expenses.expenses[index]._id,
         amount,
         description,
         category,
       };
       await axios.put(
-        `http://16.16.63.197:8000/expense/edit/${updatedExpense.id}`,
+        `http://localhost:8000/expense/edit/${updatedExpense.id}`,
         updatedExpense
       );
       expenses[index] = updatedExpense;
@@ -85,10 +85,13 @@ async function saveOrUpdateExpense(index, amount, description, category) {
   }
 }
 async function deleteExpense(index) {
+  
   try {
-    const id = expenses.expenses[index].id;
+    const expense  = expenses.expenses[index];
+    console.log("Deleting expense at index:", index)
     const token = localStorage.getItem("token");
-    await axios.delete(`http://16.16.63.197:8000/expense/delete/${id}`, {
+    const id = expense._id;
+    await axios.delete(`http://localhost:8000/expense/delete/${id}`, {
       headers: { Authorization: token },
     });
     expenses.expenses.splice(index, 1);
@@ -160,14 +163,14 @@ window.addEventListener("DOMContentLoaded", async function () {
       document.getElementById("downloadExpense").removeAttribute("title");
     }
     const response = await axios.get(
-      `http://16.16.63.197:8000/expense/get-expense?page=${1}&limit=${local}`,
+      `http://localhost:8000/expense/get-expense?page=${1}&limit=${local}`,
       { headers: { Authorization: token } }
     );
     expenses = response.data;
     renderExpenses(expenses);
     console.log(response);
     paginationFunc(response.data.pageData);
-    const files = await axios.get("http://16.16.63.197:8000/history", {
+    const files = await axios.get("http://localhost:8000/history", {
       headers: { Authorization: token },
     });
     console.log(files.data);
@@ -225,7 +228,7 @@ window.addEventListener("DOMContentLoaded", async function () {
   document.getElementById("downloadExpense").onclick =
     async function download() {
       try {
-        const response = await axios.get("http://16.16.63.197:8000/download", {
+        const response = await axios.get("http://localhost:8000/download", {
           headers: { Authorization: token },
         });
 
@@ -252,7 +255,7 @@ window.addEventListener("DOMContentLoaded", async function () {
   document.getElementById("rzp-button1").onclick = async function (e) {
     const token = localStorage.getItem("token");
     const response = await axios.get(
-      "http://16.16.63.197:8000/purchase/premiumMembership",
+      "http://localhost:8000/purchase/premiumMembership",
       { headers: { Authorization: token } }
     );
     console.log(response);
@@ -273,7 +276,7 @@ window.addEventListener("DOMContentLoaded", async function () {
       },
       handler: async function (response) {
         const res = await axios.post(
-          "http://16.16.63.197:8000/purchase/updateTransactionStatus",
+          "http://localhost:8000/purchase/updateTransactionStatus",
           {
             order_id: options.order_id,
             payment_id: response.razorPay_payment_id,
@@ -316,7 +319,7 @@ async function sendGetRequest(page) {
     const local = localStorage.getItem("pageNumber");
     const token = localStorage.getItem("token");
     const response = await axios.get(
-      `http://16.16.63.197:8000/expense/get-expense?page=${page}&limit=${local}`,
+      `http://localhost:8000/expense/get-expense?page=${page}&limit=${local}`,
       {
         headers: { Authorization: token },
       }

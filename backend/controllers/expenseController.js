@@ -1,183 +1,178 @@
 const Expense = require("../models/expense");
-const User = require("../models/user");
-const sequelize = require("../util/database");
-const { v1: uuidv1 } = require("uuid");
 const UserServices = require("../services/userService");
 const S3Services = require("../services/S3services");
 const FileUrl = require("../models/FileUrl");
+
+const mongoose = require("mongoose");
+
 exports.downloadExpenses = async (req, res) => {
   try {
     const expenses = await UserServices.getExpenses(req);
-    console.log(expenses);
-
     const stringifiedExpense = JSON.stringify(expenses);
-    const trackerId = req.user.id;
-    const filename = `Expense${trackerId}/${new Date().toLocaleString()}.txt`;
+    const userId = req.user.id;
+    const filename = `Expense${userId}/${new Date().toLocaleString()}.txt`;
     const fileURL = await S3Services.uploadToS3(stringifiedExpense, filename);
 
-    //console.log(fileURL);
     await FileUrl.create({
       url: fileURL,
       date: new Date().toLocaleString(),
-      trackerId: req.user.id,
+      userId: req.user.id,
     });
 
     res.status(200).json({ fileURL, success: true });
   } catch (error) {
-    console.log("Error: ", error);
-    res.status(500).json({ error: error.message, success: false });
+    console.error("Error downloading expenses:", error);
+    res.status(500).json({ error: "Server error", success: false });
   }
 };
-exports.createExpense = async (req, res, next) => {
-  const trans = await sequelize.transaction();
+
+exports.createExpense = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     const { amount, description, category } = req.body;
 
     if (!amount || !description || !category) {
       return res.status(400).json({ error: "Missing or invalid data" });
     }
-    const newExpense = await Expense.create(
-      {
-        amount,
-        description,
-        category,
-        trackerId: req.user.id,
-      },
-      { transaction: trans }
-    );
-    const totalExp = Number(req.user.totalExpenses) + Number(amount);
-    console.log(totalExp);
-    await User.update(
-      { totalExpenses: totalExp },
-      { where: { id: req.user.id }, transaction: trans }
-    );
-    await trans.commit();
+
+    const newExpense = await Expense.create({
+      amount,
+      description,
+      category,
+      userId: req.user.id,
+    });
+
+    const totalExp = req.user.totalExpenses + Number(amount);
+    req.user.totalExpenses = totalExp;
+    await req.user.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
+
     res.status(201).json(newExpense);
   } catch (error) {
-    await trans.rollback();
-    console.log("Error creating expense:", error);
+    await session.abortTransaction();
+    console.error("Error creating expense:", error);
     res.status(500).json({ error: "Server error" });
   }
 };
-exports.getAllExpenses = async (req, res, next) => {
+
+exports.getAllExpenses = async (req, res) => {
   try {
-    const page = parseInt(req.query.page);
-    const limit = parseInt(req.query.limit);
+    const page = Number(req.query.page) ;
+    const limit = Number(req.query.limit) 
 
-    if (isNaN(page) || page <= 0) {
-      return res.status(400).json({ error: "Invalid page value" });
+    if (page <= 0 || limit <= 0) {
+      return res.status(400).json({ error: "Invalid page or limit value" });
     }
-    const total = await Expense.count({ where: { trackerId: req.user.id } });
 
-    let hasPrePage = false;
-    let hasNextPage = false;
-    if (page !== 1) {
-      hasPrePage = true;
-    }
-    if (page * limit < total) {
-      hasNextPage = true;
-    }
+    const skip = (page - 1) * limit;
+
+    const [expenses, total] = await Promise.all([
+      Expense.find({ userId: req.user.id }).skip(skip).limit(limit),
+      Expense.countDocuments({ userId: req.user.id }),
+    ]);
+
+    const hasNextPage = skip + limit < total;
+    const hasPrePage = page > 1;
 
     const pageData = {
       currentPage: page,
       lastPage: Math.ceil(total / limit),
-      hasNextPage: hasNextPage,
-      hasPrePage: hasPrePage,
+      hasNextPage,
+      hasPrePage,
     };
 
-    const promise1 = req.user.getExpenses({
-      offset: (page - 1) * limit,
-      limit: limit,
-    });
-    const [expenses] = await Promise.all([promise1]);
     res.json({ expenses, pageData, premium: req.user.premiumUser });
   } catch (error) {
-    console.log("Error retrieving expenses:", error);
+    console.error("Error retrieving expenses:", error);
     res.status(500).json({ error: "Server error" });
   }
 };
 
-exports.getAllFileUrls = async (req, res, next) => {
+exports.getAllFileUrls = async (req, res) => {
   try {
-    findUrl = await req.user.getFileUrls();
+    const findUrl = await FileUrl.find({ userId: req.user.id });
     res.json(findUrl);
   } catch (error) {
-    console.log("Error retrieving expenses:", error);
+    console.error("Error retrieving file URLs:", error);
     res.status(500).json({ error: "Server error" });
   }
 };
 
-exports.deleteExpense = async (req, res, next) => {
-  const tran = await sequelize.transaction();
-
+exports.deleteExpense = async (req, res) => {
+  const session = await mongoose.startSession();
   try {
-    const id = req.params.Id;
-    const expense = await Expense.findByPk(id, { transaction: tran });
+    session.startTransaction();
+    const id = req.params.id;
+    console.log("Expense ID:", id);
+    
+    const expense = await Expense.findOneAndDelete({
+      _id: id,
+      userId: req.user.id,
+    },{ session });
 
+    // Check if the expense was found and deleted
     if (!expense) {
-      await tran.rollback();
-      return res.status(404).json({ err: "Expense not found" });
+      return res.status(404).json({ error: "Expense not found" });
     }
+    // Subtract the deleted expense amount from the user's total expenses
+    const updatedTotal = req.user.totalExpenses - Number(expense.amount);
+    req.user.totalExpenses = updatedTotal;
+    await req.user.save();
 
-    if (expense.trackerId !== req.user.id) {
-      await tran.rollback();
-      return res.status(403).json({ err: "Permission denied" });
-    }
-
-    await Expense.destroy({
-      where: { id: id, trackerId: req.user.id },
-      transaction: tran,
-    });
-    const totalExp = Number(req.user.totalExpenses) - Number(expense.amount);
-    console.log(totalExp);
-    await User.update(
-      { totalExpenses: totalExp },
-      { where: { id: req.user.id }, transaction: tran }
-    );
-    await tran.commit();
-
+    await session.commitTransaction();
     res.status(204).json({ message: "Expense deleted successfully" });
   } catch (error) {
-    await tran.rollback();
+  
+    await session.abortTransaction();
     console.error("Error deleting expense:", error);
     res.status(500).json({ error: "Server error" });
+  } finally {
+    
+    session.endSession();
   }
 };
 
-exports.updateExpense = async (req, res, next) => {
-  const tr = await sequelize.transaction();
 
+
+exports.updateExpense = async (req, res) => {
+  const session = await mongoose.startSession();
+  
   try {
-    const id = req.params.Id;
+    session.startTransaction();
+    const id = req.params.id;
+    console.log("Expense ID:", id);
     const { amount, description, category } = req.body;
 
-    if (
-      typeof amount !== "number" ||
-      description.length === 0 ||
-      category.length === 0
-    ) {
-      await tr.rollback();
+    if (typeof amount !== "number" || description.length === 0 || category.length === 0) {
       return res.status(400).json({ error: "Invalid or missing data" });
     }
 
-    const expense = await Expense.findByPk(id, { transaction: tr });
-
-    if (!expense) {
-      await tr.rollback();
-      return res.status(404).json({ error: "Expense not found" });
+    const userId = req.user && req.user.id; 
+    if (!userId) {
+      return res.status(401).json({ error: "User ID not found in request" });
     }
 
-    await expense.update(
+    const expense = await Expense.findOneAndUpdate(
+      { _id: id, userId },
       { amount, description, category },
-      { transaction: tr }
+      { new: true, session }
     );
 
-    await tr.commit();
-
+    if (!expense) {
+      return res.status(404).json({ error: "Expense not found" });
+    }
+    
+    await session.commitTransaction();
     res.status(200).json({ message: "Expense updated successfully" });
   } catch (error) {
-    await tr.rollback();
+    await session.abortTransaction();
     console.error("Error updating expense:", error);
     res.status(500).json({ error: "Server error" });
+  } finally {
+    session.endSession();
   }
 };
+
